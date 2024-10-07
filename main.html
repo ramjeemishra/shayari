@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shayari Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
+            authDomain: "shayaridatabase.firebaseapp.com",
+            projectId: "shayaridatabase",
+            storageBucket: "shayaridatabase.appspot.com",
+            messagingSenderId: "255324173170",
+            appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
+            measurementId: "G-BR9FC3D3F3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+
+        function loadShayaris() {
+            const shayariContainer = document.getElementById('shayari-container');
+            shayariContainer.innerHTML = '';
+
+            const shayarisRef = ref(database, 'shayaris');
+            get(shayarisRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const shayari = childSnapshot.val();
+                        const shayariDiv = document.createElement('div');
+                        shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
+                        shayariDiv.innerHTML = `
+                            <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
+                            <p>${shayari.content}</p>
+                        `;
+                        shayariContainer.appendChild(shayariDiv);
+                    });
+                } else {
+                    console.log('No shayaris found');
+                }
+            }).catch((error) => {
+                console.error('Error loading shayaris:', error);
+            });
+        }
+
+        function login(email, password) {
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    const usernameRef = ref(database, 'users/' + user.uid + '/username');
+                    get(usernameRef).then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const username = snapshot.val();
+                            document.getElementById('usernameDisplay').textContent = username;
+                            document.getElementById('loginButton').style.display = 'none';
+                            document.getElementById('postShayariForm').style.display = 'block';
+                            document.getElementById('loginFormContainer').style.display = 'none';
+                            loadShayaris();
+                        } else {
+                            console.error('No username found for this user.');
+                        }
+                    }).catch((error) => {
+                        console.error('Error fetching username:', error);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error signing in:', error);
+                    alert('Login failed: ' + error.message);
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                login(email, password);
+            });
+
+            loadShayaris();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('postShayariForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                const shayariContent = document.getElementById('shayari').value;
+
+                if (shayariContent) {
+                    const username = document.getElementById('usernameDisplay').textContent;
+                    const timestamp = new Date().toLocaleString();
+                    const shayarisRef = ref(database, 'shayaris');
+                    const newShayariRef = push(shayarisRef);
+
+                    const newShayariData = {
+                        content: shayariContent,
+                        username: username,
+                        timestamp: timestamp
+                    };
+
+                    set(newShayariRef, newShayariData)
+                        .then(() => {
+                            alert('Shayari posted successfully!');
+                            document.getElementById('shayari').value = '';
+                            loadShayaris();
+                        })
+                        .catch(error => {
+                            console.error('Error posting shayari:', error);
+                        });
+                } else {
+                    alert('Please enter a shayari');
+                }
+            });
+
+            document.getElementById('loginButton').addEventListener('click', function () {
+                document.getElementById('loginFormContainer').style.display = 'block';
+            });
+        });
+    </script>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <nav class="bg-gray-800 p-4 flex justify-between items-center">
+        <div>
+            <a href="#" class="text-2xl font-bold">Home</a>
+        </div>
+        <div>
+            <span id="usernameDisplay" class="mr-4"></span>
+            <button id="loginButton" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Login</button>
+        </div>
+    </nav>
+    <div id="loginFormContainer" class="p-6" style="display: none;">
+        <h2 class="text-xl font-semibold mb-4">Login</h2>
+        <form id="loginForm" class="bg-gray-800 p-4 rounded">
+            <div class="mb-4">
+                <label class="block text-sm mb-2" for="email">Email:</label>
+                <input type="email" id="email" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" required />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm mb-2" for="password">Password:</label>
+                <input type="password" id="password" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" required />
+            </div>
+            <button type="submit" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Login</button>
+        </form>
+    </div>
+    <section id="shayari-section" class="p-6">
+        <h2 class="text-xl font-semibold mb-4">Post a Shayari</h2>
+        <form id="postShayariForm" class="bg-gray-800 p-4 rounded" style="display: none;">
+            <div class="mb-4">
+                <label class="block text-sm mb-2" for="shayari">Shayari:</label>
+                <textarea id="shayari" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Post Shayari</button>
+        </form>
+    </section>
+    <section id="shayari-container" class="p-6"></section>
+</body>
+
+</html>
