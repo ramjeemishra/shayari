@@ -2,290 +2,322 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shayari Website</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="shayarilogo.jpeg" type="image/x-icon">
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  <meta charset="UTF-8">
+  <link rel="shortcut icon" href="shayarilogo.jpeg" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Take 'A' step</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #121212;
+    }
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
-            authDomain: "shayaridatabase.firebaseapp.com",
-            projectId: "shayaridatabase",
-            storageBucket: "shayaridatabase.appspot.com",
-            messagingSenderId: "255324173170",
-            appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
-            measurementId: "G-BR9FC3D3F3"
-        };
+    .container {
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
 
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const auth = getAuth(app);
+    .container h2 {
+      color: #fff;
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+    }
 
-        function loadShayaris() {
-            const shayariContainer = document.getElementById('shayari-container');
-            shayariContainer.innerHTML = '';
+    .input-group {
+      margin-bottom: 1rem;
+    }
 
-            const shayarisRef = ref(database, 'shayaris');
-            get(shayarisRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const shayari = childSnapshot.val();
-                        const shayariDiv = document.createElement('div');
-                        shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
-                        shayariDiv.innerHTML = `
-                            <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
-                            <p>${shayari.content}</p>
-                        `;
-                        shayariContainer.appendChild(shayariDiv);
-                    });
-                } else {
-                    console.log('No shayaris found');
-                }
-            }).catch((error) => {
-                console.error('Error loading shayaris:', error);
-            });
-        }
+    .input-group label {
+      display: block;
+      color: #ccc;
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
 
-        function login(email, password) {
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    const usernameRef = ref(database, 'users/' + user.uid + '/username');
-                    get(usernameRef).then((snapshot) => {
-                        if (snapshot.exists()) {
-                            const username = snapshot.val();
-                            document.getElementById('usernameDisplay').textContent = username;
-                            document.getElementById('loginButton').style.display = 'none';
-                            document.getElementById('shayari-section').style.display = 'block';
-                            document.getElementById('loginFormContainer').style.display = 'none';
-                            loadShayaris();
-                        } else {
-                            console.error('No username found for this user.');
-                        }
-                    }).catch((error) => {
-                        console.error('Error fetching username:', error);
-                    });
-                })
-                .catch((error) => {
-                    console.error('Error signing in:', error);
-                    alert('Login failed: ' + error.message);
-                });
-        }
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 4px;
+      background: #2e2e2e;
+      color: #fff;
+      font-size: 1rem;
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('loginForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                login(email, password);
-            });
+    .input-group input::placeholder {
+      color: #888;
+    }
 
-            loadShayaris();
-        });
+    .btn-submit {
+      padding: 0.8rem 2rem;
+      background: #4caf50;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1.5rem;
+      transition: background 0.3s;
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('postShayariForm').addEventListener('submit', function (event) {
-                event.preventDefault();
-                const shayariContent = document.getElementById('shayari').value;
+    .btn-submit:hover {
+      background: #45a045;
+    }
 
-                if (shayariContent) {
-                    const username = document.getElementById('usernameDisplay').textContent;
-                    const timestamp = new Date().toLocaleString();
-                    const shayarisRef = ref(database, 'shayaris');
-                    const newShayariRef = push(shayarisRef);
+    .status-message {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #fff;
+    }
 
-                    const newShayariData = {
-                        content: shayariContent,
-                        username: username,
-                        timestamp: timestamp
-                    };
+    .error {
+      color: red;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
 
-                    set(newShayariRef, newShayariData)
-                        .then(() => {
-                            alert('Shayari posted successfully!');
-                            document.getElementById('shayari').value = '';
-                            loadShayaris();
-                        })
-                        .catch(error => {
-                            console.error('Error posting shayari:', error);
-                        });
-                } else {
-                    alert('Please enter a shayari');
-                }
-            });
-
-            document.getElementById('loginButton').addEventListener('click', function () {
-                document.getElementById('loginFormContainer').style.display = 'block';
-            });
-        });
-    </script>
-    <style>
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.8s ease-in-out;
-        }
-
-        .neon-btn {
-            background: linear-gradient(145deg, #3b4148, #20262d);
-            box-shadow: 0 0 15px rgba(59, 65, 72, 0.7), inset 0 0 15px rgba(50, 50, 50, 0.7);
-            transition: all 0.3s ease;
-            border-radius: 9999px;
-        }
-
-        .neon-btn:hover {
-            box-shadow: 0 0 25px #4ade80, 0 0 30px #4ade80;
-            transform: translateY(-3px);
-        }
-
-        .dark-card {
-            background: linear-gradient(145deg, #222831, #1a1f25);
-            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.8), -4px -4px 12px rgba(50, 50, 50, 0.2);
-            border-radius: 20px;
-            padding: 1.5rem;
-            transition: transform 0.5s ease;
-        }
-
-        .dark-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.8), -4px -4px 15px rgba(50, 50, 50, 0.2);
-        }
-
-        .glow-text {
-            color: #fff;
-            text-shadow: 0 0 5px #4ade80, 0 0 10px #4ade80, 0 0 20px #4ade80;
-        }
-
-        .dark-input {
-            background-color: #1f2937;
-            border: 1px solid #3b4148;
-            padding: 0.8rem;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .dark-input:focus {
-            border-color: #4ade80;
-        }
-
-        .bg-animated {
-            background: linear-gradient(120deg, #20262d, #1f2937, #111827);
-            background-size: 600% 600%;
-            animation: gradientShift 10s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        .underline-animation {
-            position: relative;
-            display: inline-block;
-            color: #4ade80;
-            text-decoration: none;
-        }
-
-        .underline-animation::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: #4ade80;
-            visibility: hidden;
-            transform: scaleX(0);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .underline-animation:hover::after {
-            visibility: visible;
-            transform: scaleX(1);
-        }
-        .dark-textarea {
-            background-color: #1f2937;
-            border: 1px solid #3b4148;
-            padding: 0.8rem;
-            border-radius: 10px;
-            resize: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .dark-textarea:focus {
-            border-color: #60a5fa; 
-        }
-    </style>
+    .main {
+      display: none;
+      /* Initially hidden */
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+      background: #1e1e1e;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+  </style>
 </head>
 
-<body class="bg-animated text-white">
-    <!-- Navbar -->
-    <nav class="bg-gray-800 p-4 flex justify-between items-center shadow-xl dark-card mx-4 my-4">
-        <div class="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-600 transform transition duration-500 hover:scale-110">
-            <a href="#">The shayari section</a>
-        </div>
-        <div>
-            <span id="usernameDisplay" class="mr-4"></span>
-            <button id="loginButton" class="neon-btn px-6 py-3 text-lg">
-                Login
-            </button>
-        </div>
-    </nav>
+<body>
 
-    <!-- Login Form -->
-    <div id="loginFormContainer" class="p-6 fade-in max-w-md mx-auto dark-card glassmorph" style="display: none;">
-        <h2 class="text-2xl font-semibold mb-4 text-center glow-text">Login</h2>
-        <form id="loginForm" class="p-4">
-            <div class="mb-4">
-                <label class="block text-sm mb-2" for="email">Email:</label>
-                <input type="email" id="email" class="dark-input w-full" required />
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm mb-2" for="password">Password:</label>
-                <input type="password" id="password" class="dark-input w-full" required />
-            </div>
-            <button type="submit" class="neon-btn w-full py-3 text-lg">Login</button>
-        </form>
-    </div>
+  <div class="container">
+    <h2 id="formTitle">Sign Up</h2>
+    <form id="authForm">
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+      </div>
+      <div class="input-group">
+        <label for="email" id="preemail">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+      </div>
+      <div style="color: red;" id="permissionn">
+        <input type="checkbox" name="permission" id="permission">Allow your location for better user experence
+      </div>
+      <p class="error" id="error"></p>
+      <p class="status-message" id="statusMessage"></p>
+      <div id="btnn" style="display: flex; gap: 4dvw;">
+        <button type="submit" class="btn-submit" id="done" style="display: none;">Proceed</button>
+        <button type="button" class="btn-submit" id="loginBtn"  style="display: none;">Login</button>
+        <button class="btn-submit" style="display: none;" id="signupp" onclick="location.reload();">Create account</button>
+      </div>
+    </form>
+  </div>
 
-    <section id="shayari-section" class="p-6 fade-in max-w-2xl mx-auto dark-card my-6" style="display: none;">
-        <h2 class="text-2xl font-semibold mb-4 text-center glow-text">Post a Shayari</h2>
-        <form id="postShayariForm" class="p-4">
-            <div class="mb-4">
-                <label class="block text-sm mb-2" for="shayari">Shayari:</label>
-                <textarea id="shayari" class="dark-textarea w-full" rows="4" required></textarea>
-            </div>
-            <button type="submit" class="neon-btn w-full py-3 text-lg">Post Shayari</button>
-        </form>
-    </section>
 
-    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in">
-    </section>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
+  authDomain: "shayaridatabase.firebaseapp.com",
+  projectId: "shayaridatabase",
+  storageBucket: "shayaridatabase.appspot.com",
+  messagingSenderId: "255324173170",
+  appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
+  measurementId: "G-BR9FC3D3F3"
+};
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is logged in, redirect to main.html
+        // window.location.href = 'main.html';
+      }
+    });
+    // Function to get user's location
+    function getUserLocation() {
+      return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resolve({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              });
+            },
+            (error) => {
+              reject("Unable to fetch location: " + error.message);
+            }
+          );
+        } else {
+          reject("Geolocation is not supported by this browser.");
+        }
+      });
+    }
+
+    // Function to update status message
+    function updateStatusMessage(message) {
+      const statusMessageElement = document.getElementById('statusMessage');
+      statusMessageElement.textContent = message;
+    }
+
+    // Handle form submission for sign up and login
+    document.getElementById('authForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const email = document.getElementById('email').value;
+
+      // Clear previous error message
+      document.getElementById('error').textContent = '';
+
+      if (document.getElementById('formTitle').innerText === 'Sign Up') {
+        // Sign Up
+        updateStatusMessage('Creating account...');
+        getUserLocation()
+          .then((location) => {
+            const { latitude, longitude } = location;
+
+            createUserWithEmailAndPassword(auth, email, password)
+              .then((userCredential) => {
+                const userId = userCredential.user.uid; 
+                set(ref(db, 'users/' + userId), { 
+                  username: username,
+                  email: email,
+                  location: {
+                    latitude: latitude,
+                    longitude: longitude
+                  }
+                }).then(() => {
+                  updateStatusMessage('Account created successfully!');
+                  resetForm();
+                }).catch((error) => {
+                  console.error("Error storing user information: ", error);
+                  document.getElementById('error').textContent = "Error storing user information.";
+                  updateStatusMessage('');
+                });
+              })
+              .catch((error) => {
+                console.error("Error creating user: ", error);
+                document.getElementById('error').textContent = error.message;
+                updateStatusMessage('');
+              });
+          })
+          .catch((error) => {
+            console.error(error);
+            document.getElementById('error').textContent = error;
+            updateStatusMessage('');
+          });
+      }
+      else {
+        updateStatusMessage('Checking your username and password...');
+        get(child(ref(db), 'users/')).then((snapshot) => {
+          let userFound = false;
+          snapshot.forEach((childSnapshot) => {
+            const userData = childSnapshot.val();
+            const userId = childSnapshot.key;
+            if (userData.username === username) {
+              userFound = true;
+              const email = userData.email; // Retrieve email from database
+              signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                  updateStatusMessage('');
+                  localStorage.setItem('loggedIn', 'true');
+
+                  // Redirect to another HTML file on successful login
+                  window.location.href = 'main.html'; 
+                })
+                .catch((error) => {
+                  console.error("Error signing in: ", error);
+                  document.getElementById('error').textContent = error.message;
+                  updateStatusMessage('');
+                });
+            }
+          });
+          if (!userFound) {
+            document.getElementById('error').textContent = "Username not found.";
+            updateStatusMessage('');
+          }
+        }).catch((error) => {
+          console.error("Error getting user data: ", error);
+          document.getElementById('error').textContent = "Error getting user data.";
+          updateStatusMessage('');
+        });
+      }
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', function () {
+      document.getElementById('formTitle').innerText = 'Login';
+      document.getElementById('authForm').reset();
+      document.getElementById('error').textContent = '';
+
+      document.getElementById('email').style.display = "none";
+      document.getElementById('preemail').style.display = "none";
+      document.getElementById('loginBtn').style.display = "none";
+      document.getElementById('btnn').style.display = "flex";
+      document.getElementById('btnn').style.gap = "4dvw";
+      document.getElementById('signupp').style.display = "block";
+      document.getElementById('permissionn').style.display = "none";
+      document.getElementById('done').style.display = "block";
+
+
+
+
+      document.getElementById('email').required = false;
+
+      document.getElementById('statusMessage').textContent = ''; 
+    });
+
+    // Function to reset form for new sign up
+    function resetForm() {
+      document.getElementById('formTitle').innerText = 'Sign Up';
+      document.getElementById('authForm').reset();
+      document.getElementById('error').textContent = '';
+
+      document.getElementById('email').style.display = "block";
+      document.getElementById('preemail').style.display = "block"; 
+      document.getElementById('email').required = true;
+    }
+
+
+
+    const checkbox = document.getElementById('permission');
+        const doneElement = document.getElementById('done');
+
+        checkbox.addEventListener('change', function() {
+            if (checkbox.checked) {
+                doneElement.style.display = 'block';
+            } else {
+                doneElement.style.display = 'none';
+            }
+        });
+
+  </script>
+
 </body>
 
 </html>
