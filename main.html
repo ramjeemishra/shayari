@@ -61,7 +61,7 @@
                             const username = snapshot.val();
                             document.getElementById('usernameDisplay').textContent = username;
                             document.getElementById('loginButton').style.display = 'none';
-                            document.getElementById('postShayariForm').style.display = 'block';
+                            document.getElementById('shayari-section').style.display = 'block';
                             document.getElementById('loginFormContainer').style.display = 'none';
                             loadShayaris();
                         } else {
@@ -124,43 +124,168 @@
             });
         });
     </script>
+    <style>
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .neon-btn {
+            background: linear-gradient(145deg, #3b4148, #20262d);
+            box-shadow: 0 0 15px rgba(59, 65, 72, 0.7), inset 0 0 15px rgba(50, 50, 50, 0.7);
+            transition: all 0.3s ease;
+            border-radius: 9999px;
+        }
+
+        .neon-btn:hover {
+            box-shadow: 0 0 25px #4ade80, 0 0 30px #4ade80;
+            transform: translateY(-3px);
+        }
+
+        .dark-card {
+            background: linear-gradient(145deg, #222831, #1a1f25);
+            box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.8), -4px -4px 12px rgba(50, 50, 50, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: transform 0.5s ease;
+        }
+
+        .dark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.8), -4px -4px 15px rgba(50, 50, 50, 0.2);
+        }
+
+        .glow-text {
+            color: #fff;
+            text-shadow: 0 0 5px #4ade80, 0 0 10px #4ade80, 0 0 20px #4ade80;
+        }
+
+        .dark-input {
+            background-color: #1f2937;
+            border: 1px solid #3b4148;
+            padding: 0.8rem;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .dark-input:focus {
+            border-color: #4ade80;
+        }
+
+        .bg-animated {
+            background: linear-gradient(120deg, #20262d, #1f2937, #111827);
+            background-size: 600% 600%;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .underline-animation {
+            position: relative;
+            display: inline-block;
+            color: #4ade80;
+            text-decoration: none;
+        }
+
+        .underline-animation::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: #4ade80;
+            visibility: hidden;
+            transform: scaleX(0);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .underline-animation:hover::after {
+            visibility: visible;
+            transform: scaleX(1);
+        }
+        .dark-textarea {
+            background-color: #1f2937;
+            border: 1px solid #3b4148;
+            padding: 0.8rem;
+            border-radius: 10px;
+            resize: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .dark-textarea:focus {
+            border-color: #60a5fa; 
+        }
+    </style>
 </head>
 
-<body class="bg-gray-900 text-white">
-    <nav class="bg-gray-800 p-4 flex justify-between items-center">
-        <div>
-            <a href="#" class="text-2xl font-bold">Home</a>
+<body class="bg-animated text-white">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 p-4 flex justify-between items-center shadow-xl dark-card mx-4 my-4">
+        <div class="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-600 transform transition duration-500 hover:scale-110">
+            <a href="#">The shayari section</a>
         </div>
         <div>
             <span id="usernameDisplay" class="mr-4"></span>
-            <button id="loginButton" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Login</button>
+            <button id="loginButton" class="neon-btn px-6 py-3 text-lg">
+                Login
+            </button>
         </div>
     </nav>
-    <div id="loginFormContainer" class="p-6" style="display: none;">
-        <h2 class="text-xl font-semibold mb-4">Login</h2>
-        <form id="loginForm" class="bg-gray-800 p-4 rounded">
+
+    <!-- Login Form -->
+    <div id="loginFormContainer" class="p-6 fade-in max-w-md mx-auto dark-card glassmorph" style="display: none;">
+        <h2 class="text-2xl font-semibold mb-4 text-center glow-text">Login</h2>
+        <form id="loginForm" class="p-4">
             <div class="mb-4">
                 <label class="block text-sm mb-2" for="email">Email:</label>
-                <input type="email" id="email" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" required />
+                <input type="email" id="email" class="dark-input w-full" required />
             </div>
             <div class="mb-4">
                 <label class="block text-sm mb-2" for="password">Password:</label>
-                <input type="password" id="password" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" required />
+                <input type="password" id="password" class="dark-input w-full" required />
             </div>
-            <button type="submit" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Login</button>
+            <button type="submit" class="neon-btn w-full py-3 text-lg">Login</button>
         </form>
     </div>
-    <section id="shayari-section" class="p-6">
-        <h2 class="text-xl font-semibold mb-4">Post a Shayari</h2>
-        <form id="postShayariForm" class="bg-gray-800 p-4 rounded" style="display: none;">
+
+    <section id="shayari-section" class="p-6 fade-in max-w-2xl mx-auto dark-card my-6" style="display: none;">
+        <h2 class="text-2xl font-semibold mb-4 text-center glow-text">Post a Shayari</h2>
+        <form id="postShayariForm" class="p-4">
             <div class="mb-4">
                 <label class="block text-sm mb-2" for="shayari">Shayari:</label>
-                <textarea id="shayari" class="w-full p-2 bg-gray-700 border border-gray-600 rounded" rows="4" required></textarea>
+                <textarea id="shayari" class="dark-textarea w-full" rows="4" required></textarea>
             </div>
-            <button type="submit" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">Post Shayari</button>
+            <button type="submit" class="neon-btn w-full py-3 text-lg">Post Shayari</button>
         </form>
     </section>
-    <section id="shayari-container" class="p-6"></section>
+
+    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in">
+    </section>
 </body>
 
 </html>
