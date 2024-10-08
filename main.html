@@ -215,6 +215,7 @@
                 }).then(() => {
                   updateStatusMessage('Account created successfully!');
                   resetForm();
+                  window.location.href = 'index.html'; 
                 }).catch((error) => {
                   console.error("Error storing user information: ", error);
                   document.getElementById('error').textContent = "Error storing user information.";
