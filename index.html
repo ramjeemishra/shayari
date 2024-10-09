@@ -317,6 +317,60 @@
     #userList li{
       padding-top: 3%;
     }
+    .made-with-love {
+    width: max-content;
+    position: absolute;
+    /* bottom: 20px; */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #e0e0e0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.made-with-love i {
+    color: #ff4081;
+    transition: color 0.3s;
+}
+
+.made-with-love i#heart:hover, .made-with-love i#coffee:hover {
+    color: #ff80ab;
+}
+
+.made-with-love a {
+    color: #6a676795;
+    text-decoration: none;
+    position: relative;
+    display: inline-block;
+    padding: 4px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+}
+
+.made-with-love a:hover {
+    color: #4CAF50;
+}
+
+.made-with-love a::after {
+    content: "";
+    display: block;
+    height: 2px;
+    background: #4CAF50;
+    width: 0;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transition: width 0.3s, left 0.3s;
+}
+
+.made-with-love a:hover::after {
+    width: 100%;
+    left: 0;
+}
   </style>
 </head>
 
@@ -378,7 +432,10 @@
       <button id="closeUserList" class="mt-4 bg-red-600 text-white py-2 px-4 rounded-lg">Close</button>
     </div>
   </div>
-
+  <div class="made-with-love">
+    Made with <i id="heart">💖</i>&amp;<i id="coffee">☕</i> by
+    <a href="https://ramjeemishra.github.io/Ramjee_Mishra/">Developer Ram</a>
+</div>
 </body>
 
 </html>
