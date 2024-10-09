@@ -28,28 +28,41 @@
     const auth = getAuth(app);
 
     function loadShayaris() {
-      const shayariContainer = document.getElementById('shayari-container');
-      shayariContainer.innerHTML = '';
+    const shayariContainer = document.getElementById('shayari-container');
+    shayariContainer.innerHTML = ''; // Clear existing content
 
-      const shayarisRef = ref(database, 'shayaris');
-      get(shayarisRef).then((snapshot) => {
+    const shayarisRef = ref(database, 'shayaris');
+    get(shayarisRef).then((snapshot) => {
         if (snapshot.exists()) {
-          snapshot.forEach((childSnapshot) => {
-            const shayari = childSnapshot.val();
-            const shayariDiv = document.createElement('div');
-            shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
-            shayariDiv.innerHTML = `
-              <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
-              <p style="white-space: pre-wrap;">${shayari.content}</p>`;
-            shayariContainer.appendChild(shayariDiv);
-          });
+            // Create an array to hold the shayaris for later use
+            const shayaris = [];
+
+            snapshot.forEach((childSnapshot) => {
+                const shayari = childSnapshot.val();
+                shayaris.push(shayari); // Store each shayari in the array
+            });
+
+            // Iterate over the shayaris in reverse order to display the latest first
+            for (let i = shayaris.length - 1; i >= 0; i--) {
+                const shayari = shayaris[i];
+                const shayariDiv = document.createElement('div');
+                shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
+                shayariDiv.innerHTML = `
+                    <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
+                    <p style="white-space: pre-wrap;">${shayari.content}</p>`;
+                shayariContainer.appendChild(shayariDiv);
+            }
+
+            // Scroll to the top after loading new shayaris
+            shayariContainer.scrollTop = 0;
         } else {
-          console.log('No shayaris found');
+            console.log('No shayaris found');
         }
-      }).catch((error) => {
+    }).catch((error) => {
         console.error('Error loading shayaris:', error);
-      });
-    }
+    });
+}
+
 
     function login(email, password) {
       signInWithEmailAndPassword(auth, email, password)
@@ -118,6 +131,7 @@
                 <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
                 <p style="white-space: pre-wrap;">${shayari.content}</p>`;
               shayariContainer.appendChild(shayariDiv);
+              shayariContainer.scrollTop = 0;
             }
           });
         } else {
@@ -349,7 +363,7 @@
     </form>
   </section>
   <section id="non-main-shayari-container">
-    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in" style="display: flex; flex-direction: column-reverse; height: 80dvh; overflow-y: scroll; scrollbar-width: none;">
+    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in" style="display: flex; flex-direction: column; height: 80dvh; overflow-y: scroll; scrollbar-width: none;">
     </section>
   </section>
 
