@@ -86,20 +86,70 @@
       margin-top: 1rem;
     }
 
-    .main {
-      display: none;
-      /* Initially hidden */
-      color: #fff;
-      text-align: center;
-      padding: 2rem;
-      background: #1e1e1e;
+    .popup {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding-top: 60px;
+    }
+
+    .popup-content {
+      background-color: #1e1e1e;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 400px;
       border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup h3 {
+      color: #fff;
+    }
+
+    .popup p {
+      color: #ccc;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: white;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .timer {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      color: white;
+      font-size: 1.2rem;
+      z-index: 1001; /* Above the popup */
+    }
+    .popup-content ul li{
+      color: rgba(0, 255, 0, 0.642);
     }
   </style>
 </head>
 
 <body>
+
+  <div class="timer" id="timer">10</div>
 
   <div class="container">
     <h2 id="formTitle">Sign Up</h2>
@@ -117,18 +167,33 @@
         <input type="password" id="password" name="password" placeholder="Enter your password" required>
       </div>
       <div style="color: red;" id="permissionn">
-        <input type="checkbox" name="permission" id="permission">Allow your location for better user experence
+        <input type="checkbox" name="permission" id="permission" style="cursor: pointer;"> ⬅  Allow your location for better user experience
       </div>
       <p class="error" id="error"></p>
       <p class="status-message" id="statusMessage"></p>
       <div id="btnn" style="display: flex; gap: 4dvw;">
         <button type="submit" class="btn-submit" id="done" style="display: none;">Proceed</button>
-        <button type="button" class="btn-submit" id="loginBtn"  style="display: none;">Login</button>
+        <button type="button" class="btn-submit" id="loginBtn" style="display: none;">Login</button>
         <button class="btn-submit" style="display: none;" id="signupp" onclick="location.reload();">Create account</button>
       </div>
     </form>
   </div>
 
+  <!-- Location Permission Popup -->
+  <div id="locationPopup" class="popup">
+    <div class="popup-content">
+      <h3>Why We Need Your Location</h3>
+      <p>We ask for your location to enhance your experience on our Shayari platform. By sharing your location, we can:</p>
+      <ul>
+        <li>Provide personalized content relevant to your region.</li>
+        <li>Show popular Shayari trends in your area.</li>
+        <li>Connect you with a local community of Shayari lovers.</li>
+        <li>Improve your overall experience on our site.</li>
+      </ul>
+      <p>Your location will be kept confidential and will not be shared without your consent.</p>
+      <p style="color: rgba(255, 255, 0, 0.581);"><strong>So please click the <code style="color: #ff0000;">"box"</code>  after filling the form.</strong></p>
+    </div>
+  </div>
 
   <!-- Firebase SDKs -->
   <script type="module">
@@ -138,14 +203,14 @@
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
-  apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
-  authDomain: "shayaridatabase.firebaseapp.com",
-  projectId: "shayaridatabase",
-  storageBucket: "shayaridatabase.appspot.com",
-  messagingSenderId: "255324173170",
-  appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
-  measurementId: "G-BR9FC3D3F3"
-};
+      apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
+      authDomain: "shayaridatabase.firebaseapp.com",
+      projectId: "shayaridatabase",
+      storageBucket: "shayaridatabase.appspot.com",
+      messagingSenderId: "255324173170",
+      appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
+      measurementId: "G-BR9FC3D3F3"
+    };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
@@ -157,6 +222,7 @@
         // window.location.href = 'main.html';
       }
     });
+
     // Function to get user's location
     function getUserLocation() {
       return new Promise((resolve, reject) => {
@@ -192,42 +258,39 @@
       const password = document.getElementById('password').value;
       const email = document.getElementById('email').value;
 
-      // Clear previous error message
-      document.getElementById('error').textContent = '';
+      const permissionChecked = document.getElementById('permission').checked;
 
-      if (document.getElementById('formTitle').innerText === 'Sign Up') {
-        // Sign Up
+      if (permissionChecked) {
         updateStatusMessage('Creating account...');
-        getUserLocation()
-          .then((location) => {
-            const { latitude, longitude } = location;
+        getUserLocation().then((location) => {
+          const { latitude, longitude } = location;
 
-            createUserWithEmailAndPassword(auth, email, password)
-              .then((userCredential) => {
-                const userId = userCredential.user.uid; 
-                set(ref(db, 'users/' + userId), { 
-                  username: username,
-                  email: email,
-                  location: {
-                    latitude: latitude,
-                    longitude: longitude
-                  }
-                }).then(() => {
-                  updateStatusMessage('Account created successfully!');
-                  resetForm();
-                  window.location.href = 'index.html'; 
-                }).catch((error) => {
-                  console.error("Error storing user information: ", error);
-                  document.getElementById('error').textContent = "Error storing user information.";
-                  updateStatusMessage('');
-                });
-              })
-              .catch((error) => {
-                console.error("Error creating user: ", error);
-                document.getElementById('error').textContent = error.message;
+          createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              const userId = userCredential.user.uid;
+              set(ref(db, 'users/' + userId), {
+                username: username,
+                email: email,
+                location: {
+                  latitude: latitude,
+                  longitude: longitude
+                }
+              }).then(() => {
+                updateStatusMessage('Account created successfully!');
+                resetForm();
+                window.location.href = 'index.html'; 
+              }).catch((error) => {
+                console.error("Error storing user information: ", error);
+                document.getElementById('error').textContent = "Error storing user information.";
                 updateStatusMessage('');
               });
-          })
+            })
+            .catch((error) => {
+              console.error("Error creating user: ", error);
+              document.getElementById('error').textContent = error.message;
+              updateStatusMessage('');
+            });
+        })
           .catch((error) => {
             console.error(error);
             document.getElementById('error').textContent = error;
@@ -250,7 +313,7 @@
                   localStorage.setItem('loggedIn', 'true');
 
                   // Redirect to another HTML file on successful login
-                  window.location.href = 'main.html'; 
+                  window.location.href = 'main.html';
                 })
                 .catch((error) => {
                   console.error("Error signing in: ", error);
@@ -285,12 +348,9 @@
       document.getElementById('permissionn').style.display = "none";
       document.getElementById('done').style.display = "block";
 
-
-
-
       document.getElementById('email').required = false;
 
-      document.getElementById('statusMessage').textContent = ''; 
+      document.getElementById('statusMessage').textContent = '';
     });
 
     // Function to reset form for new sign up
@@ -300,14 +360,33 @@
       document.getElementById('error').textContent = '';
 
       document.getElementById('email').style.display = "block";
-      document.getElementById('preemail').style.display = "block"; 
+      document.getElementById('preemail').style.display = "block";
       document.getElementById('email').required = true;
     }
 
+    const doneElement = document.getElementById('done');
+    const locationPopup = document.getElementById('locationPopup');
+    const closePopup = document.getElementById('closePopup');
 
+    // Show the popup when the page loads
+    window.onload = function () {
+      locationPopup.style.display = 'block'; // Show the popup
 
+      // Countdown timer
+      let countdown = 10;
+      document.getElementById('timer').textContent = countdown;
+
+      const timerInterval = setInterval(() => {
+        countdown--;
+        document.getElementById('timer').textContent = countdown;
+        if (countdown <= 0) {
+          clearInterval(timerInterval);
+          locationPopup.style.display = 'none'; // Hide the popup after 10 seconds
+          timer.style.display = "none";
+        }
+      }, 1000);
+    };
     const checkbox = document.getElementById('permission');
-        const doneElement = document.getElementById('done');
 
         checkbox.addEventListener('change', function() {
             if (checkbox.checked) {
@@ -316,6 +395,15 @@
                 doneElement.style.display = 'none';
             }
         });
+
+
+    let timer = document.getElementById('timer');
+    // Close the popup when the user clicks anywhere outside of the popup
+    window.onclick = function (event) {
+      if (event.target === locationPopup) {
+        locationPopup.style.display = "none";
+      }
+    }
 
   </script>
 
