@@ -87,7 +87,8 @@
     }
 
     .popup {
-      display: none; /* Hidden by default */
+      display: none;
+      /* Hidden by default */
       position: fixed;
       z-index: 1000;
       left: 0;
@@ -139,9 +140,11 @@
       right: 20px;
       color: white;
       font-size: 1.2rem;
-      z-index: 1001; /* Above the popup */
+      z-index: 1001;
+      /* Above the popup */
     }
-    .popup-content ul li{
+
+    .popup-content ul li {
       color: rgba(0, 255, 0, 0.642);
     }
   </style>
@@ -167,14 +170,16 @@
         <input type="password" id="password" name="password" placeholder="Enter your password" required>
       </div>
       <div style="color: red;" id="permissionn">
-        <input type="checkbox" name="permission" id="permission" style="cursor: pointer;"> ⬅  Allow your location for better user experience
+        <input type="checkbox" name="permission" id="permission" style="cursor: pointer;"> ⬅ Allow your location for
+        better user experience
       </div>
       <p class="error" id="error"></p>
       <p class="status-message" id="statusMessage"></p>
       <div id="btnn" style="display: flex; gap: 4dvw;">
         <button type="submit" class="btn-submit" id="done" style="display: none;">Proceed</button>
         <button type="button" class="btn-submit" id="loginBtn" style="display: none;">Login</button>
-        <button class="btn-submit" style="display: none;" id="signupp" onclick="location.reload();">Create account</button>
+        <button class="btn-submit" style="display: none;" id="signupp" onclick="location.reload();">Create
+          account</button>
       </div>
     </form>
   </div>
@@ -183,7 +188,8 @@
   <div id="locationPopup" class="popup">
     <div class="popup-content">
       <h3>Why We Need Your Location</h3>
-      <p>We ask for your location to enhance your experience on our Shayari platform. By sharing your location, we can:</p>
+      <p>We ask for your location to enhance your experience on our Shayari platform. By sharing your location, we can:
+      </p>
       <ul>
         <li>Provide personalized content relevant to your region.</li>
         <li>Show popular Shayari trends in your area.</li>
@@ -191,219 +197,14 @@
         <li>Improve your overall experience on our site.</li>
       </ul>
       <p>Your location will be kept confidential and will not be shared without your consent.</p>
-      <p style="color: rgba(255, 255, 0, 0.581);"><strong>So please click the <code style="color: #ff0000;">"box"</code>  after filling the form.</strong></p>
+      <p style="color: rgba(255, 255, 0, 0.581);"><strong>So please click the <code style="color: #ff0000;">"box"</code>
+          after filling the form.</strong></p>
     </div>
   </div>
 
   <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8",
-      authDomain: "shayaridatabase.firebaseapp.com",
-      projectId: "shayaridatabase",
-      storageBucket: "shayaridatabase.appspot.com",
-      messagingSenderId: "255324173170",
-      appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb",
-      measurementId: "G-BR9FC3D3F3"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is logged in, redirect to main.html
-        // window.location.href = 'main.html';
-      }
-    });
-
-    // Function to get user's location
-    function getUserLocation() {
-      return new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              resolve({
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude
-              });
-            },
-            (error) => {
-              reject("Unable to fetch location: " + error.message);
-            }
-          );
-        } else {
-          reject("Geolocation is not supported by this browser.");
-        }
-      });
-    }
-
-    // Function to update status message
-    function updateStatusMessage(message) {
-      const statusMessageElement = document.getElementById('statusMessage');
-      statusMessageElement.textContent = message;
-    }
-
-    // Handle form submission for sign up and login
-    document.getElementById('authForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const email = document.getElementById('email').value;
-
-      const permissionChecked = document.getElementById('permission').checked;
-
-      if (permissionChecked) {
-        updateStatusMessage('Creating account...');
-        getUserLocation().then((location) => {
-          const { latitude, longitude } = location;
-
-          createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-              const userId = userCredential.user.uid;
-              set(ref(db, 'users/' + userId), {
-                username: username,
-                email: email,
-                location: {
-                  latitude: latitude,
-                  longitude: longitude
-                }
-              }).then(() => {
-                updateStatusMessage('Account created successfully!');
-                resetForm();
-                window.location.href = 'index.html'; 
-              }).catch((error) => {
-                console.error("Error storing user information: ", error);
-                document.getElementById('error').textContent = "Error storing user information.";
-                updateStatusMessage('');
-              });
-            })
-            .catch((error) => {
-              console.error("Error creating user: ", error);
-              document.getElementById('error').textContent = error.message;
-              updateStatusMessage('');
-            });
-        })
-          .catch((error) => {
-            console.error(error);
-            document.getElementById('error').textContent = error;
-            updateStatusMessage('');
-          });
-      }
-      else {
-        updateStatusMessage('Checking your username and password...');
-        get(child(ref(db), 'users/')).then((snapshot) => {
-          let userFound = false;
-          snapshot.forEach((childSnapshot) => {
-            const userData = childSnapshot.val();
-            const userId = childSnapshot.key;
-            if (userData.username === username) {
-              userFound = true;
-              const email = userData.email; // Retrieve email from database
-              signInWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                  updateStatusMessage('');
-                  localStorage.setItem('loggedIn', 'true');
-
-                  // Redirect to another HTML file on successful login
-                  window.location.href = 'main.html';
-                })
-                .catch((error) => {
-                  console.error("Error signing in: ", error);
-                  document.getElementById('error').textContent = error.message;
-                  updateStatusMessage('');
-                });
-            }
-          });
-          if (!userFound) {
-            document.getElementById('error').textContent = "Username not found.";
-            updateStatusMessage('');
-          }
-        }).catch((error) => {
-          console.error("Error getting user data: ", error);
-          document.getElementById('error').textContent = "Error getting user data.";
-          updateStatusMessage('');
-        });
-      }
-    });
-
-    document.getElementById('loginBtn').addEventListener('click', function () {
-      document.getElementById('formTitle').innerText = 'Login';
-      document.getElementById('authForm').reset();
-      document.getElementById('error').textContent = '';
-
-      document.getElementById('email').style.display = "none";
-      document.getElementById('preemail').style.display = "none";
-      document.getElementById('loginBtn').style.display = "none";
-      document.getElementById('btnn').style.display = "flex";
-      document.getElementById('btnn').style.gap = "4dvw";
-      document.getElementById('signupp').style.display = "block";
-      document.getElementById('permissionn').style.display = "none";
-      document.getElementById('done').style.display = "block";
-
-      document.getElementById('email').required = false;
-
-      document.getElementById('statusMessage').textContent = '';
-    });
-
-    // Function to reset form for new sign up
-    function resetForm() {
-      document.getElementById('formTitle').innerText = 'Sign Up';
-      document.getElementById('authForm').reset();
-      document.getElementById('error').textContent = '';
-
-      document.getElementById('email').style.display = "block";
-      document.getElementById('preemail').style.display = "block";
-      document.getElementById('email').required = true;
-    }
-
-    const doneElement = document.getElementById('done');
-    const locationPopup = document.getElementById('locationPopup');
-    const closePopup = document.getElementById('closePopup');
-
-    // Show the popup when the page loads
-    window.onload = function () {
-      locationPopup.style.display = 'block'; // Show the popup
-
-      // Countdown timer
-      let countdown = 10;
-      document.getElementById('timer').textContent = countdown;
-
-      const timerInterval = setInterval(() => {
-        countdown--;
-        document.getElementById('timer').textContent = countdown;
-        if (countdown <= 0) {
-          clearInterval(timerInterval);
-          locationPopup.style.display = 'none'; // Hide the popup after 10 seconds
-          timer.style.display = "none";
-        }
-      }, 1000);
-    };
-    const checkbox = document.getElementById('permission');
-
-        checkbox.addEventListener('change', function() {
-            if (checkbox.checked) {
-                doneElement.style.display = 'block';
-            } else {
-                doneElement.style.display = 'none';
-            }
-        });
-
-
-    let timer = document.getElementById('timer');
-    // Close the popup when the user clicks anywhere outside of the popup
-    window.onclick = function (event) {
-      if (event.target === locationPopup) {
-        locationPopup.style.display = "none";
-      }
-    }
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"; import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"; import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js"; const firebaseConfig = { apiKey: "AIzaSyDPBjSD85dnh4RTj9UWy46TS1zHOFpaoG8", authDomain: "shayaridatabase.firebaseapp.com", projectId: "shayaridatabase", storageBucket: "shayaridatabase.appspot.com", messagingSenderId: "255324173170", appId: "1:255324173170:web:4f2e7653c3f0f1b9d8a3eb", measurementId: "G-BR9FC3D3F3" }; const app = initializeApp(firebaseConfig); const db = getDatabase(app); const auth = getAuth(app); onAuthStateChanged(auth, user => { if (user) { } }); function getUserLocation() { return new Promise((resolve, reject) => { if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(position => { resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }) }, error => { reject("Unable to fetch location: " + error.message) }) } else { reject("Geolocation is not supported by this browser.") } }) } function updateStatusMessage(message) { const statusMessageElement = document.getElementById("statusMessage"); statusMessageElement.textContent = message } document.getElementById("authForm").addEventListener("submit", function (e) { e.preventDefault(); const username = document.getElementById("username").value; const password = document.getElementById("password").value; const email = document.getElementById("email").value; const permissionChecked = document.getElementById("permission").checked; if (permissionChecked) { updateStatusMessage("Creating account..."); getUserLocation().then(location => { const { latitude, longitude } = location; createUserWithEmailAndPassword(auth, email, password).then(userCredential => { const userId = userCredential.user.uid; set(ref(db, "users/" + userId), { username: username, email: email, location: { latitude: latitude, longitude: longitude } }).then(() => { updateStatusMessage("Account created successfully!"); resetForm(); window.location.href = "index.html" })["catch"](error => { console.error("Error storing user information: ", error); document.getElementById("error").textContent = "Error storing user information."; updateStatusMessage("") }) })["catch"](error => { console.error("Error creating user: ", error); document.getElementById("error").textContent = error.message; updateStatusMessage("") }) })["catch"](error => { console.error(error); document.getElementById("error").textContent = error; updateStatusMessage("") }) } else { updateStatusMessage("Checking your username and password..."); get(child(ref(db), "users/")).then(snapshot => { let userFound = false; snapshot.forEach(childSnapshot => { const userData = childSnapshot.val(); const userId = childSnapshot.key; if (userData.username === username) { userFound = true; const email = userData.email; signInWithEmailAndPassword(auth, email, password).then(() => { updateStatusMessage(""); localStorage.setItem("loggedIn", "true"); window.location.href = "main.html" })["catch"](error => { console.error("Error signing in: ", error); document.getElementById("error").textContent = error.message; updateStatusMessage("") }) } }); if (!userFound) { document.getElementById("error").textContent = "Username not found."; updateStatusMessage("") } })["catch"](error => { console.error("Error getting user data: ", error); document.getElementById("error").textContent = "Error getting user data."; updateStatusMessage("") }) } }); document.getElementById("loginBtn").addEventListener("click", function () { document.getElementById("formTitle").innerText = "Login"; document.getElementById("authForm").reset(); document.getElementById("error").textContent = ""; document.getElementById("email").style.display = "none"; document.getElementById("preemail").style.display = "none"; document.getElementById("loginBtn").style.display = "none"; document.getElementById("btnn").style.display = "flex"; document.getElementById("btnn").style.gap = "4dvw"; document.getElementById("signupp").style.display = "block"; document.getElementById("permissionn").style.display = "none"; document.getElementById("done").style.display = "block"; document.getElementById("email").required = false; document.getElementById("statusMessage").textContent = "" }); function resetForm() { document.getElementById("formTitle").innerText = "Sign Up"; document.getElementById("authForm").reset(); document.getElementById("error").textContent = ""; document.getElementById("email").style.display = "block"; document.getElementById("preemail").style.display = "block"; document.getElementById("email").required = true } const doneElement = document.getElementById("done"); const locationPopup = document.getElementById("locationPopup"); const closePopup = document.getElementById("closePopup"); window.onload = function () { locationPopup.style.display = "block"; let countdown = 10; document.getElementById("timer").textContent = countdown; const timerInterval = setInterval(() => { countdown--; document.getElementById("timer").textContent = countdown; if (countdown <= 0) { clearInterval(timerInterval); locationPopup.style.display = "none"; timer.style.display = "none" } }, 1e3) }; const checkbox = document.getElementById("permission"); checkbox.addEventListener("change", function () { if (checkbox.checked) { doneElement.style.display = "block" } else { doneElement.style.display = "none" } }); let timer = document.getElementById("timer"); window.onclick = function (event) { if (event.target === locationPopup) { locationPopup.style.display = "none" } };
 
   </script>
 
