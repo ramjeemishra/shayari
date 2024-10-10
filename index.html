@@ -28,40 +28,40 @@
     const auth = getAuth(app);
 
     function loadShayaris() {
-    const shayariContainer = document.getElementById('shayari-container');
-    shayariContainer.innerHTML = ''; // Clear existing content
+      const shayariContainer = document.getElementById('shayari-container');
+      shayariContainer.innerHTML = ''; // Clear existing content
 
-    const shayarisRef = ref(database, 'shayaris');
-    get(shayarisRef).then((snapshot) => {
+      const shayarisRef = ref(database, 'shayaris');
+      get(shayarisRef).then((snapshot) => {
         if (snapshot.exists()) {
-            // Create an array to hold the shayaris for later use
-            const shayaris = [];
+          // Create an array to hold the shayaris for later use
+          const shayaris = [];
 
-            snapshot.forEach((childSnapshot) => {
-                const shayari = childSnapshot.val();
-                shayaris.push(shayari); // Store each shayari in the array
-            });
+          snapshot.forEach((childSnapshot) => {
+            const shayari = childSnapshot.val();
+            shayaris.push(shayari); // Store each shayari in the array
+          });
 
-            // Iterate over the shayaris in reverse order to display the latest first
-            for (let i = shayaris.length - 1; i >= 0; i--) {
-                const shayari = shayaris[i];
-                const shayariDiv = document.createElement('div');
-                shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
-                shayariDiv.innerHTML = `
+          // Iterate over the shayaris in reverse order to display the latest first
+          for (let i = shayaris.length - 1; i >= 0; i--) {
+            const shayari = shayaris[i];
+            const shayariDiv = document.createElement('div');
+            shayariDiv.classList.add('bg-gray-800', 'p-4', 'rounded', 'mb-4');
+            shayariDiv.innerHTML = `
                     <p class="text-sm text-gray-400">${shayari.username} - ${shayari.timestamp}</p>
                     <p style="white-space: pre-wrap;">${shayari.content}</p>`;
-                shayariContainer.appendChild(shayariDiv);
-            }
+            shayariContainer.appendChild(shayariDiv);
+          }
 
-            // Scroll to the top after loading new shayaris
-            shayariContainer.scrollTop = 0;
+          // Scroll to the top after loading new shayaris
+          shayariContainer.scrollTop = 0;
         } else {
-            console.log('No shayaris found');
+          console.log('No shayaris found');
         }
-    }).catch((error) => {
+      }).catch((error) => {
         console.error('Error loading shayaris:', error);
-    });
-}
+      });
+    }
 
 
     function login(email, password) {
@@ -158,7 +158,8 @@
 
         if (shayariContent) {
           const username = document.getElementById('usernameDisplay').textContent;
-          const timestamp = new Date().toLocaleString();
+          const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+          const timestamp = new Date().toLocaleDateString('en-GB', dateOptions) + ' ' + new Date().toLocaleTimeString();
           const shayarisRef = ref(database, 'shayaris');
           const newShayariRef = push(shayarisRef);
 
@@ -180,20 +181,19 @@
         } else {
           alert('Please enter a shayari');
         }
+
       });
 
-      // View users button
       document.getElementById('viewUsersButton').addEventListener('click', () => {
         loadUsernames();
         document.getElementById('userListModal').style.display = 'flex';
       });
 
-      // Close user list modal
       document.getElementById('closeUserList').addEventListener('click', () => {
         document.getElementById('userListModal').style.display = 'none';
       });
 
-      loadShayaris(); // Initial loading of shayaris
+      loadShayaris(); 
     });
   </script>
 
@@ -314,68 +314,70 @@
     .dark-textarea:focus {
       border-color: #60a5fa;
     }
-    #userList li{
+
+    #userList li {
       padding-top: 3%;
     }
+
     .made-with-love {
-    width: max-content;
-    position: absolute;
-    /* bottom: 20px; */
-    left: 50%;
-    transform: translateX(-50%);
-    color: #e0e0e0;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
+      width: max-content;
+      position: absolute;
+      /* bottom: 20px; */
+      left: 50%;
+      transform: translateX(-50%);
+      color: #e0e0e0;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
 
-.made-with-love i {
-    color: #ff4081;
-    transition: color 0.3s;
-}
+    .made-with-love i {
+      color: #ff4081;
+      transition: color 0.3s;
+    }
 
-.made-with-love i#heart:hover, .made-with-love i#coffee:hover {
-    color: #ff80ab;
-}
+    .made-with-love i#heart:hover,
+    .made-with-love i#coffee:hover {
+      color: #ff80ab;
+    }
 
-.made-with-love a {
-    color: #6a676795;
-    text-decoration: none;
-    position: relative;
-    display: inline-block;
-    padding: 4px;
-    font-weight: bold;
-    letter-spacing: 0.1em;
-    transition: color 0.3s;
-}
+    .made-with-love a {
+      color: #6a676795;
+      text-decoration: none;
+      position: relative;
+      display: inline-block;
+      padding: 4px;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      transition: color 0.3s;
+    }
 
-.made-with-love a:hover {
-    color: #4CAF50;
-}
+    .made-with-love a:hover {
+      color: #4CAF50;
+    }
 
-.made-with-love a::after {
-    content: "";
-    display: block;
-    height: 2px;
-    background: #4CAF50;
-    width: 0;
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transition: width 0.3s, left 0.3s;
-}
+    .made-with-love a::after {
+      content: "";
+      display: block;
+      height: 2px;
+      background: #4CAF50;
+      width: 0;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transition: width 0.3s, left 0.3s;
+    }
 
-.made-with-love a:hover::after {
-    width: 100%;
-    left: 0;
-}
+    .made-with-love a:hover::after {
+      width: 100%;
+      left: 0;
+    }
   </style>
 </head>
 
 <body class="bg-animated text-white">
-  <!-- Navbar -->
   <nav class="bg-gray-800 p-4 flex justify-between items-center shadow-xl dark-card mx-4 my-4">
     <div
       class="text-3xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-600 transform transition duration-500 hover:scale-110">
@@ -405,7 +407,6 @@
         again</p>
     </form>
   </div>
-  <!-- Shayari section -->
   <section id="shayari-section" class="p-6 fade-in max-w-2xl mx-auto dark-card my-6" style="display: none;">
     <h2 class="text-2xl font-semibold mb-4 text-center glow-text">Post a Shayari</h2>
     <form id="postShayariForm" class="p-4">
@@ -417,25 +418,27 @@
     </form>
   </section>
   <section id="non-main-shayari-container">
-    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in" style="display: flex; flex-direction: column; height: 80dvh; overflow-y: scroll; scrollbar-width: none;">
+    <section id="shayari-container" class="p-6 max-w-2xl mx-auto fade-in"
+      style="display: flex; flex-direction: column; height: 80dvh; overflow-y: scroll; scrollbar-width: none;">
     </section>
   </section>
 
 
 
-  <!-- User List Modal -->
   <div id="userListModal" style="display:none; overflow-y: scroll;"
     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
     <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
       <h2 class="text-xl font-semibold mb-4">All User's</h2>
-      <ul id="userList" class="list-disc pl-6" style="display: grid; overflow-y: scroll; height: 24dvh; background: #f0f8ff1c; width: fit-content; border-radius: 5%; color: skyblue; scrollbar-width: none; padding-right: 22px;"></ul>
+      <ul id="userList" class="list-disc pl-6"
+        style="display: grid; overflow-y: scroll; height: 24dvh; background: #f0f8ff1c; width: fit-content; border-radius: 5%; color: skyblue; scrollbar-width: none; padding-right: 22px;">
+      </ul>
       <button id="closeUserList" class="mt-4 bg-red-600 text-white py-2 px-4 rounded-lg">Close</button>
     </div>
   </div>
   <div class="made-with-love">
     Made with <i id="heart">💖</i>&amp;<i id="coffee">☕</i> by
     <a href="https://ramjeemishra.github.io/Ramjee_Mishra/">Developer Ram</a>
-</div>
+  </div>
 </body>
 
 </html>
